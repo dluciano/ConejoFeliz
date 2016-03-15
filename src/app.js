@@ -55,7 +55,7 @@ var HelloWorldLayer = cc.Layer.extend({
     },
     fallingObjs: function(){
         var x = this.sprFondo.x;
-        var y = this.sprFondo.y;
+        var y = cc.winSize.height;
         this.addChild(new Boomb(x, y), 1);
     }
 });
