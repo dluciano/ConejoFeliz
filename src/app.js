@@ -7,6 +7,12 @@ function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+
+function luckyNumber(){
+    var r = Math.round(getRandomArbitrary(7, 84));
+    return r % 7 === 0 || r % 12 === 0;
+}
+
 var GameManager = cc.Class.extend({
     ctor: function(){
         this.pointsLbl.attr({
@@ -71,6 +77,32 @@ var MenuLayer = cc.Layer.extend({
     }
 });
 
+var Player = cc.Sprite.extend({
+    bk: null,
+    ctor: function(bk){
+        this._super(res.conejo_png);
+        var size = cc.winSize;
+        this.attr({
+            x: size.width / 2,
+            y: size.height * 0.15
+        });
+        this.bk = bk;
+        this.scheduleUpdate();
+        return true;
+    },
+    update: function(dt){
+        var cX = this.x ;
+        var min = this.bk.x - this.bk.width/2;
+        var max = this.bk.x + this.bk.width/2;
+        if((cX- this.width/2) <= min){
+            this.x = min + this.width/2;
+            return;
+        }
+        if((cX + this.width/2)>= max)
+            this.x = max - this.width/2;
+    }
+});
+
 var HelloWorldLayer = cc.Layer.extend({
     sprFondo:null,
     sprConejo:null,
@@ -86,23 +118,22 @@ var HelloWorldLayer = cc.Layer.extend({
         this.addChild(this.sprFondo, 0, BK);
         
         //posicionando la imagen de fondo
-        this.sprConejo = new cc.Sprite(res.conejo_png);
-        this.sprConejo.setPosition(size.width / 2,size.height * 0.15);
+        this.sprConejo = new Player(this.sprFondo);
         this.addChild(this.sprConejo, 1, PL);
 
         manager.pointsLbl.attr({
             x: this.sprFondo.x - this.sprFondo.width/2,
             y: size.height - 32
         });
-        
-          //add a keyboard event listener to statusLabel
+                
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
             onKeyPressed:  function(keyCode, event){
                 if(self.ended)return;
+                
                 var mov = 8;
                 var s = .5;
-                if(keyCode === 39){
+                if(keyCode === 39 ){
                     var action = cc.moveBy(s, cc.p(mov, 0));
                     self.sprConejo.runAction(action);
                 }
@@ -118,9 +149,8 @@ var HelloWorldLayer = cc.Layer.extend({
         return true;
     },
     fallingObjs: function() {
-        this.fallBoombs();
-        
-         if(getRandomArbitrary(1, 100)%7 ===0 || getRandomArbitrary(1, 100)%12 === 0){
+         //this.fallBoombs();
+         if(luckyNumber()){
              this.fallCarrots();
          }
     },
@@ -152,7 +182,7 @@ var HelloWorldLayer = cc.Layer.extend({
         this.addChild(carrot, 1);
     },
     showGameOver: function(){
-        //cc.audioEngine.playEffect(res.gameover_mp3);
+        cc.audioEngine.playEffect(res.gameover_mp3);
         cc.audioEngine.stopMusic();
         this.ended = true;
         this.unscheduleAllCallbacks();
@@ -175,7 +205,7 @@ var HelloWorldScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
         this.addChild(new MenuLayer(), 100);
-        //cc.audioEngine.playMusic(res.main_mp3, true);
+        cc.audioEngine.playMusic(res.main_mp3, true);
         this.addChild(new HelloWorldLayer(), 1);
     }
 });
