@@ -1,3 +1,17 @@
+var Boomb = cc.Sprite.extend({
+    ctor: function(x, y){
+        this._super(res.bomba_png);
+        this.scheduleUpdate();
+        this.attr({
+            x: x,
+            y: y
+        });
+        return true;
+    },
+    update: function(dt){
+        this.runAction(cc.moveBy(0.5, cc.p(0, -1)));
+    }
+});
 
 var HelloWorldLayer = cc.Layer.extend({
     sprFondo:null,
@@ -24,7 +38,6 @@ var HelloWorldLayer = cc.Layer.extend({
             onKeyPressed:  function(keyCode, event){
                 var mov = 8;
                 var s = .5;
-                
                 if(keyCode === 39){
                     var action = cc.moveBy(s, cc.p(mov, 0));
                     self.sprConejo.runAction(action);
@@ -33,13 +46,17 @@ var HelloWorldLayer = cc.Layer.extend({
                     var action = cc.moveBy(s, cc.p(-mov, 0));
                     self.sprConejo.runAction(action);
                 }
-            },
-            onKeyReleased: function(keyCode, event){
-                
             }
         }, this); 
         
+        this.schedule(this.fallingObjs, 1);
+        
         return true;
+    },
+    fallingObjs: function(){
+        var x = this.sprFondo.x;
+        var y = this.sprFondo.y;
+        this.addChild(new Boomb(x, y), 1);
     }
 });
 
@@ -50,4 +67,3 @@ var HelloWorldScene = cc.Scene.extend({
         this.addChild(layer);
     }
 });
-
