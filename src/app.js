@@ -176,7 +176,6 @@ var HelloWorldLayer = cc.Layer.extend({
         }, this); 
         
         this.schedule(this.fallingObjs, 1);
-        this.scheduleOnce(this.fallShield, 1);
         
         return true;
     },
@@ -185,9 +184,9 @@ var HelloWorldLayer = cc.Layer.extend({
          if(luckyNumber(7, 12, 7, 84)){
              this.fallCarrots();
          }
-         //if(luckyNumber(40, 33, 33, 333)){
-             //this.fallShield();
-         //}
+         if(luckyNumber(40, 33, 33, 333)){
+             this.fallShield();
+         }
     },
     fallBoombs: function(){
         var self = this;
@@ -247,7 +246,7 @@ var HelloWorldLayer = cc.Layer.extend({
         this.unscheduleAllCallbacks();
         this.getChildren().forEach(function(c){
             if(c.getTag() === BK || c.getTag() === PL) return;
-            c.unscheduleAllCallbacks();
+            c.pause();
         });
         var gm = new cc.Sprite(res.gameover_png);
         gm.attr({
