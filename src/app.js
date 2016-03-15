@@ -7,6 +7,43 @@ function getRandomArbitrary(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+var GameManager = cc.Class.extend({
+    ctor: function(){
+        this.pointsLbl.attr({
+            anchorX: 0,
+            anchorY: 0
+        });
+        this.pointsLbl.setColor(cc.color(255,255,255, 100));
+    },
+    points: 0,
+    pointsLbl: new cc.LabelTTF('Points: 0',  'Arial', 16),
+    addPoint: function(amount){
+        this.points += amount;
+        this.pointsLbl.setString('Points: '+this.points);
+    }
+});
+
+
+var manager = new GameManager();
+
+var Carrot = cc.Sprite.extend({
+    ctor: function(y){
+        this._super(res.carrot_png);
+        this.scheduleUpdate();
+        this.attr({
+            y: y
+        });
+        return true;
+    },
+    update: function(dt) {
+        this.onUpdate();
+        this.runAction(cc.moveBy(0.5, cc.p(0, -getRandomArbitrary(1, 10))));
+        if(this.y <= 0){
+            this.removeFromParent(true);
+        }
+    },
+});
+
 var Boomb = cc.Sprite.extend({
     ctor: function(y){
         this._super(res.bomba_png);
@@ -18,10 +55,20 @@ var Boomb = cc.Sprite.extend({
     },
     update: function(dt) {
         this.onUpdate();
-        this.runAction(cc.moveBy(0.5, cc.p(0, -10)));
-        if(this.y <= 0)
+        this.runAction(cc.moveBy(0.5, cc.p(0, -getRandomArbitrary(1, 10))));
+        if(this.y <= 0){
+            manager.addPoint(1);
             this.removeFromParent(true);
+        }
     },
+});
+
+var MenuLayer = cc.Layer.extend({
+    ctor: function(){
+        this._super();
+        this.addChild(manager.pointsLbl, 100);
+        return true;
+    }
 });
 
 var HelloWorldLayer = cc.Layer.extend({
@@ -43,6 +90,11 @@ var HelloWorldLayer = cc.Layer.extend({
         this.sprConejo.setPosition(size.width / 2,size.height * 0.15);
         this.addChild(this.sprConejo, 1, PL);
 
+        manager.pointsLbl.attr({
+            x: this.sprFondo.x - this.sprFondo.width/2,
+            y: size.height - 32
+        });
+        
           //add a keyboard event listener to statusLabel
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
@@ -66,6 +118,13 @@ var HelloWorldLayer = cc.Layer.extend({
         return true;
     },
     fallingObjs: function() {
+        this.fallBoombs();
+        
+         if(getRandomArbitrary(1, 100)%7 ===0 || getRandomArbitrary(1, 100)%12 === 0){
+             this.fallCarrots();
+         }
+    },
+    fallBoombs: function(){
         var self = this;
         var boomb = new Boomb(this.sprFondo.height);
         var min = this.sprFondo.x - this.sprFondo.width/2 + boomb.width/2;
@@ -76,12 +135,24 @@ var HelloWorldLayer = cc.Layer.extend({
             }
         };
         boomb.x = getRandomArbitrary(min, max);
-        if(this.ended)
-            return;
         this.addChild(boomb, 1);
     },
+    fallCarrots: function(){
+        var self = this;
+        var carrot = new Carrot(this.sprFondo.height);
+        var min = this.sprFondo.x - this.sprFondo.width/2 + carrot.width/2;
+        var max = this.sprFondo.x + this.sprFondo.width/2 - carrot.width/2;
+        carrot.onUpdate = function(){
+            if(cc.rectIntersectsRect(this.getBoundingBoxToWorld(), self.sprConejo.getBoundingBoxToWorld())){
+                manager.addPoint(5);
+                this.removeFromParent(true);
+            }
+        };
+        carrot.x = getRandomArbitrary(min, max);
+        this.addChild(carrot, 1);
+    },
     showGameOver: function(){
-        cc.audioEngine.playEffect(res.gameover_mp3);
+        //cc.audioEngine.playEffect(res.gameover_mp3);
         cc.audioEngine.stopMusic();
         this.ended = true;
         this.unscheduleAllCallbacks();
@@ -103,8 +174,8 @@ var HelloWorldLayer = cc.Layer.extend({
 var HelloWorldScene = cc.Scene.extend({
     onEnter:function () {
         this._super();
-        var layer = new HelloWorldLayer();
-        cc.audioEngine.playMusic(res.main_mp3, true);
-        this.addChild(layer);
+        this.addChild(new MenuLayer(), 100);
+        //cc.audioEngine.playMusic(res.main_mp3, true);
+        this.addChild(new HelloWorldLayer(), 1);
     }
 });

@@ -4,7 +4,8 @@ var res = {
     fondo_png : "res/fondo.png",
     gameover_png: "res/gameover.png",
     gameover_mp3: "res/gameover.mp3",
-    main_mp3: "res/main.m4a"
+    main_mp3: "res/main2.m4a",
+    carrot_png: "res/zanahoria.png"
 };
 
 var g_resources = [];
