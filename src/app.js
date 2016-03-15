@@ -15,6 +15,8 @@ function luckyNumber(a, b, min, max){
 
 var GameManager = cc.Class.extend({
     ctor: function(){
+        this.shields = [];
+        this.pointsLbl = new cc.LabelTTF('Points: 0',  'Arial', 16);
         this.pointsLbl.attr({
             anchorX: 0,
             anchorY: 0
@@ -22,17 +24,16 @@ var GameManager = cc.Class.extend({
         this.pointsLbl.setColor(cc.color(255,255,255, 100));
     },
     points: 0,
-    pointsLbl: new cc.LabelTTF('Points: 0',  'Arial', 16),
+    pointsLbl: null,
     addPoint: function(amount){
         this.points += amount;
         this.pointsLbl.setString('Points: '+this.points);
     },
-    addShield: function(s){
+    addShield: function(){
         var self = this;
-        this.shields.push(s);
-        s.schedule(function(){
-            self.shields.pop();
-        }, 7);
+        var n = new cc.Node();
+        this.shields.push(n);        
+        return n;
     },
     shields: [],
     hasShield: function(){
@@ -41,7 +42,7 @@ var GameManager = cc.Class.extend({
 });
 
 
-var manager = new GameManager();
+var manager ={};
 
 var Carrot = cc.Sprite.extend({
     ctor: function(y){
@@ -175,6 +176,7 @@ var HelloWorldLayer = cc.Layer.extend({
         }, this); 
         
         this.schedule(this.fallingObjs, 1);
+        this.scheduleOnce(this.fallShield, 1);
         
         return true;
     },
@@ -183,9 +185,9 @@ var HelloWorldLayer = cc.Layer.extend({
          if(luckyNumber(7, 12, 7, 84)){
              this.fallCarrots();
          }
-         if(luckyNumber(40, 33, 33, 333)){
-             this.fallShield();
-         }
+         //if(luckyNumber(40, 33, 33, 333)){
+             //this.fallShield();
+         //}
     },
     fallBoombs: function(){
         var self = this;
@@ -226,7 +228,11 @@ var HelloWorldLayer = cc.Layer.extend({
         var max = this.sprFondo.x + this.sprFondo.width/2 - shield.width/2;
         shield.onUpdate = function(){
             if(cc.rectIntersectsRect(this.getBoundingBoxToWorld(), self.sprConejo.getBoundingBoxToWorld())){
-                manager.addShield(this);
+                var n = manager.addShield();
+                n.schedule(function(dt){
+                    manager.shields.shift();
+                }, 7);
+                self.addChild(n);
                 this.removeFromParent(true);
             }
         };
@@ -234,6 +240,7 @@ var HelloWorldLayer = cc.Layer.extend({
         this.addChild(shield, 1);
     },
     showGameOver: function(){
+        var self = this;
         cc.audioEngine.playEffect(res.gameover_mp3);
         cc.audioEngine.stopMusic();
         this.ended = true;
@@ -249,11 +256,27 @@ var HelloWorldLayer = cc.Layer.extend({
             scale: 0.2
         });
         this.addChild(gm, 2);
+        // example
+        var btn = new ccui.Button();
+        btn.attr({
+            x: this.sprFondo.x,
+            y: this.sprFondo.y-32,
+        });
+        btn.setTitleText("New Game");
+        btn.addClickEventListener(function () {
+            cc.director.pushScene(new HelloWorldScene());
+        });
+        this.addChild(btn);
     },
     ended: false,
 });
 
 var HelloWorldScene = cc.Scene.extend({
+    ctor: function(){
+        this._super();
+        manager =  new GameManager();
+        return true;
+    },
     onEnter:function () {
         this._super();
         this.addChild(new MenuLayer(), 100);
