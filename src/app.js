@@ -16,6 +16,8 @@ var Boomb = cc.Sprite.extend({
     },
     update: function(dt){
         this.runAction(cc.moveBy(0.5, cc.p(0, -1)));
+        if(this.y <= 0)
+            this.removeFromParent(true);
     }
 });
 
@@ -59,7 +61,7 @@ var HelloWorldLayer = cc.Layer.extend({
         
         return true;
     },
-    fallingObjs: function(){
+    fallingObjs: function() {
         var boomb = new Boomb(this.sprFondo.height);
         var min = this.sprFondo.x - this.sprFondo.width/2 + boomb.width/2;
         var max = this.sprFondo.x + this.sprFondo.width/2 - boomb.width/2;
