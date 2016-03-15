@@ -1,9 +1,15 @@
+/**
+ * Returns a random number between min (inclusive) and max (exclusive)
+ */
+function getRandomArbitrary(min, max) {
+    return Math.random() * (max - min) + min;
+}
+
 var Boomb = cc.Sprite.extend({
-    ctor: function(x, y){
+    ctor: function(y){
         this._super(res.bomba_png);
         this.scheduleUpdate();
         this.attr({
-            x: x,
             y: y
         });
         return true;
@@ -49,14 +55,16 @@ var HelloWorldLayer = cc.Layer.extend({
             }
         }, this); 
         
-        this.schedule(this.fallingObjs, 1);
+        this.schedule(this.fallingObjs, 3);
         
         return true;
     },
     fallingObjs: function(){
-        var x = this.sprFondo.x;
-        var y = cc.winSize.height;
-        this.addChild(new Boomb(x, y), 1);
+        var boomb = new Boomb(this.sprFondo.height);
+        var min = this.sprFondo.x - this.sprFondo.width/2 + boomb.width/2;
+        var max = this.sprFondo.x + this.sprFondo.width/2 - boomb.width/2;
+        boomb.x = getRandomArbitrary(min, max);
+        this.addChild(boomb, 1);
     }
 });
 
