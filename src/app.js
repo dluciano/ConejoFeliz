@@ -8,9 +8,9 @@ function getRandomArbitrary(min, max) {
 }
 
 
-function luckyNumber(){
-    var r = Math.round(getRandomArbitrary(7, 84));
-    return r % 7 === 0 || r % 12 === 0;
+function luckyNumber(a, b, min, max){
+    var r = Math.round(getRandomArbitrary(min, max));
+    return r % a === 0 || r % b === 0;
 }
 
 var GameManager = cc.Class.extend({
@@ -26,6 +26,17 @@ var GameManager = cc.Class.extend({
     addPoint: function(amount){
         this.points += amount;
         this.pointsLbl.setString('Points: '+this.points);
+    },
+    addShield: function(s){
+        var self = this;
+        this.shields.push(s);
+        s.schedule(function(){
+            self.shields.pop();
+        }, 7);
+    },
+    shields: [],
+    hasShield: function(){
+        return this.shields.length > 0;
     }
 });
 
@@ -38,6 +49,25 @@ var Carrot = cc.Sprite.extend({
         this.scheduleUpdate();
         this.attr({
             y: y
+        });
+        return true;
+    },
+    update: function(dt) {
+        this.onUpdate();
+        this.runAction(cc.moveBy(0.5, cc.p(0, -getRandomArbitrary(1, 10))));
+        if(this.y <= 0){
+            this.removeFromParent(true);
+        }
+    },
+});
+
+var Shiled = cc.Sprite.extend({
+    ctor: function(y){
+        this._super(res.shield_png);
+        this.scheduleUpdate();
+        this.attr({
+            y: y,
+            scale: 0.5
         });
         return true;
     },
@@ -131,7 +161,7 @@ var HelloWorldLayer = cc.Layer.extend({
             onKeyPressed:  function(keyCode, event){
                 if(self.ended)return;
                 
-                var mov = 8;
+                var mov = 16;
                 var s = .5;
                 if(keyCode === 39 ){
                     var action = cc.moveBy(s, cc.p(mov, 0));
@@ -150,8 +180,11 @@ var HelloWorldLayer = cc.Layer.extend({
     },
     fallingObjs: function() {
          this.fallBoombs();
-         if(luckyNumber()){
+         if(luckyNumber(7, 12, 7, 84)){
              this.fallCarrots();
+         }
+         if(luckyNumber(40, 33, 33, 333)){
+             this.fallShield();
          }
     },
     fallBoombs: function(){
@@ -161,7 +194,12 @@ var HelloWorldLayer = cc.Layer.extend({
         var max = this.sprFondo.x + this.sprFondo.width/2 - boomb.width/2;
         boomb.onUpdate = function(){
             if(cc.rectIntersectsRect(this.getBoundingBoxToWorld(), self.sprConejo.getBoundingBoxToWorld())){
-                 self.showGameOver();
+                if(manager.hasShield()){
+                    manager.addPoint(2);
+                    this.removeFromParent();
+                    return;
+                } 
+                self.showGameOver();
             }
         };
         boomb.x = getRandomArbitrary(min, max);
@@ -180,6 +218,20 @@ var HelloWorldLayer = cc.Layer.extend({
         };
         carrot.x = getRandomArbitrary(min, max);
         this.addChild(carrot, 1);
+    },
+    fallShield: function(){
+        var self = this;
+        var shield = new Shiled(this.sprFondo.height);
+        var min = this.sprFondo.x - this.sprFondo.width/2 + shield.width/2;
+        var max = this.sprFondo.x + this.sprFondo.width/2 - shield.width/2;
+        shield.onUpdate = function(){
+            if(cc.rectIntersectsRect(this.getBoundingBoxToWorld(), self.sprConejo.getBoundingBoxToWorld())){
+                manager.addShield(this);
+                this.removeFromParent(true);
+            }
+        };
+        shield.x = getRandomArbitrary(min, max);
+        this.addChild(shield, 1);
     },
     showGameOver: function(){
         cc.audioEngine.playEffect(res.gameover_mp3);
