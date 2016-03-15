@@ -4,6 +4,7 @@ var HelloWorldLayer = cc.Layer.extend({
     sprConejo:null,
     ctor:function () {
         this._super();
+        var self = this;
         //Obteniendo el tamaño de la pantalla
         var size = cc.winSize;
 
@@ -17,7 +18,27 @@ var HelloWorldLayer = cc.Layer.extend({
         this.sprConejo.setPosition(size.width / 2,size.height * 0.15);
         this.addChild(this.sprConejo, 1);
 
-
+          //add a keyboard event listener to statusLabel
+        cc.eventManager.addListener({
+            event: cc.EventListener.KEYBOARD,
+            onKeyPressed:  function(keyCode, event){
+                var mov = 8;
+                var s = .5;
+                
+                if(keyCode === 39){
+                    var action = cc.moveBy(s, cc.p(mov, 0));
+                    self.sprConejo.runAction(action);
+                }
+                if(keyCode === 37){
+                    var action = cc.moveBy(s, cc.p(-mov, 0));
+                    self.sprConejo.runAction(action);
+                }
+            },
+            onKeyReleased: function(keyCode, event){
+                
+            }
+        }, this); 
+        
         return true;
     }
 });
