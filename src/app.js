@@ -149,7 +149,7 @@ var HelloWorldLayer = cc.Layer.extend({
         return true;
     },
     fallingObjs: function() {
-         //this.fallBoombs();
+         this.fallBoombs();
          if(luckyNumber()){
              this.fallCarrots();
          }
