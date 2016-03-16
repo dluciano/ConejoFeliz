@@ -6,7 +6,8 @@ var res = {
     gameover_mp3: "res/gameover.mp3",
     main_mp3: "res/main2.m4a",
     carrot_png: "res/zanahoria.png",
-    shield_png: "res/shield.png"
+    shield_png: "res/shield.png",
+    conejo_s: "res/conejo_s.png",
 };
 
 var g_resources = [];

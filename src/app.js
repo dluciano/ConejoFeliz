@@ -160,7 +160,7 @@ var HelloWorldLayer = cc.Layer.extend({
         cc.eventManager.addListener({
             event: cc.EventListener.KEYBOARD,
             onKeyPressed:  function(keyCode, event){
-                if(self.ended)return;
+                if(self.ended) return;
                 
                 var mov = 16;
                 var s = .5;
@@ -228,8 +228,11 @@ var HelloWorldLayer = cc.Layer.extend({
         shield.onUpdate = function(){
             if(cc.rectIntersectsRect(this.getBoundingBoxToWorld(), self.sprConejo.getBoundingBoxToWorld())){
                 var n = manager.addShield();
+                self.sprConejo.setTexture(res.conejo_s);
                 n.schedule(function(dt){
                     manager.shields.shift();
+                    if(manager.shields.length <= 0)
+                        self.sprConejo.setTexture(res.conejo_png);
                 }, 7);
                 self.addChild(n);
                 this.removeFromParent(true);
