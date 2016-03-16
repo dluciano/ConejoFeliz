@@ -96,8 +96,10 @@ var Boomb = cc.Sprite.extend({
         if(this.y <= 0){
             manager.addPoint(1);
             this.removeFromParent(true);
+            this.onBoom();
         }
     },
+    onBoom: function(){}
 });
 
 var MenuLayer = cc.Layer.extend({
@@ -142,7 +144,7 @@ var HelloWorldLayer = cc.Layer.extend({
         var self = this;
         //Obteniendo el tamaño de la pantalla
         var size = cc.winSize;
-
+        
         //posicionando la imagen de fondo
         this.sprFondo = new cc.Sprite(res.fondo_png);
         this.sprFondo.setPosition(size.width / 2,size.height / 2);
@@ -204,6 +206,16 @@ var HelloWorldLayer = cc.Layer.extend({
             }
         };
         boomb.x = getRandomArbitrary(min, max);
+        boomb.onBoom = function(){
+            var fuego = new cc.ParticleFire();
+            fuego.setDuration(0.1);
+            fuego.setTexture(cc.textureCache.addImage(res.bomba_png));
+            fuego.attr({
+                x: this.x, 
+                y: this.y
+            });
+            self.addChild(fuego, 10);  
+        };
         this.addChild(boomb, 1);
     },
     fallCarrots: function(){
