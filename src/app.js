@@ -1,5 +1,9 @@
 var BK = 1;
 var PL = 2;
+var STOPED = 0;
+var RIGHT = 1;
+var LEFT = -1;
+
 /**
  * Returns a random number between min (inclusive) and max (exclusive)
  */
@@ -124,16 +128,23 @@ var Player = cc.Sprite.extend({
         return true;
     },
     update: function(dt){
+        var action = cc.moveBy(.5, cc.p(this.mov*16, 0));
+        this.runAction(action);
+
         var cX = this.x ;
         var min = this.bk.x - this.bk.width/2;
         var max = this.bk.x + this.bk.width/2;
+        
         if((cX- this.width/2) <= min){
             this.x = min + this.width/2;
             return;
         }
-        if((cX + this.width/2)>= max)
+        if((cX + this.width/2)>= max){
             this.x = max - this.width/2;
-    }
+            return;
+        }
+    },
+    mov: STOPED
 });
 
 var HelloWorldLayer = cc.Layer.extend({
@@ -163,17 +174,17 @@ var HelloWorldLayer = cc.Layer.extend({
             event: cc.EventListener.KEYBOARD,
             onKeyPressed:  function(keyCode, event){
                 if(self.ended) return;
-                
-                var mov = 16;
-                var s = .5;
                 if(keyCode === 39 ){
-                    var action = cc.moveBy(s, cc.p(mov, 0));
-                    self.sprConejo.runAction(action);
+                    self.sprConejo.mov = RIGHT;
                 }
                 if(keyCode === 37){
-                    var action = cc.moveBy(s, cc.p(-mov, 0));
-                    self.sprConejo.runAction(action);
+                    self.sprConejo.mov = LEFT;
                 }
+            },
+            onKeyReleased: function(keyCode, event){
+                if(self.ended) return;
+                if(keyCode === 39 || keyCode === 37)
+                    self.sprConejo.mov = STOPED;
             }
         }, this); 
         
@@ -270,7 +281,7 @@ var HelloWorldLayer = cc.Layer.extend({
             scale: 0.2
         });
         this.addChild(gm, 2);
-        // example
+        
         var btn = new ccui.Button();
         btn.attr({
             x: this.sprFondo.x,
